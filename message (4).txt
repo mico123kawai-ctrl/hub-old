@@ -1,0 +1,2220 @@
+--========================================================
+-- ❤️ THII HUB'S
+--========================================================
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local TextChatService = game:GetService("TextChatService")
+local TextService = game:GetService("TextService")
+local MaterialService = game:GetService("MaterialService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+--========================================================
+-- CORES
+--========================================================
+
+local RED = Color3.fromRGB(255, 45, 45)
+local BG = Color3.fromRGB(18, 8, 8)
+local OFF_COLOR = Color3.fromRGB(45, 25, 25)
+local ON_COLOR = Color3.fromRGB(110, 15, 15)
+local TEXT = Color3.fromRGB(255, 235, 235)
+local TEXT_OFF = Color3.fromRGB(160, 135, 135)
+
+local SMALL_SIZE = UDim2.fromOffset(190, 50)
+local BIG_SIZE = UDim2.fromOffset(330, 550)
+
+--========================================================
+-- REMOVE HUB ANTIGO
+--========================================================
+
+local old = playerGui:FindFirstChild("MM2_ThiiHub") or playerGui:FindFirstChild("MM2_RedHub") or playerGui:FindFirstChild("MM2_CyanHub")
+
+if old then
+    old:Destroy()
+end
+
+--========================================================
+-- GUI PRINCIPAL
+--========================================================
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "MM2_ThiiHub"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = playerGui
+
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = SMALL_SIZE
+main.Position = UDim2.new(0.5, -95, 0.2, 0)
+main.BackgroundColor3 = BG
+main.BorderSizePixel = 0
+main.ClipsDescendants = true
+main.Active = true
+main.ZIndex = 10
+main.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 13)
+corner.Parent = main
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = RED
+stroke.Thickness = 1.5
+stroke.Transparency = 0.08
+stroke.Parent = main
+
+--========================================================
+-- HEADER
+--========================================================
+
+local header = Instance.new("TextButton")
+header.Name = "DragHeader"
+header.Size = UDim2.new(1, 0, 0, 50)
+header.BackgroundTransparency = 1
+header.Text = ""
+header.AutoButtonColor = false
+header.Active = true
+header.ZIndex = 20
+header.Parent = main
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -55, 1, 0)
+title.Position = UDim2.fromOffset(14, 0)
+title.BackgroundTransparency = 1
+title.Text = "❤️  THII HUB'S"
+title.TextColor3 = TEXT
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 21
+title.Parent = header
+
+local minus = Instance.new("TextButton")
+minus.Size = UDim2.fromOffset(40, 40)
+minus.Position = UDim2.new(1, -45, 0, 5)
+minus.BackgroundTransparency = 1
+minus.Text = "−"
+minus.TextColor3 = RED
+minus.Font = Enum.Font.GothamBold
+minus.TextSize = 26
+minus.AutoButtonColor = false
+minus.Visible = false
+minus.ZIndex = 30
+minus.Parent = main
+
+--========================================================
+-- LISTA
+--========================================================
+
+local content = Instance.new("ScrollingFrame")
+content.Name = "Scripts"
+content.Size = UDim2.new(1, -16, 1, -61)
+content.Position = UDim2.fromOffset(8, 55)
+content.BackgroundTransparency = 1
+content.BorderSizePixel = 0
+content.ScrollBarThickness = 3
+content.ScrollBarImageColor3 = RED
+content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+content.CanvasSize = UDim2.new()
+content.Visible = false
+content.Active = true
+content.ZIndex = 15
+content.Parent = main
+
+local padding = Instance.new("UIPadding")
+padding.PaddingTop = UDim.new(0, 2)
+padding.PaddingBottom = UDim.new(0, 5)
+padding.Parent = content
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 7)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = content
+
+--========================================================
+-- ESTADOS
+--========================================================
+
+local states = {
+    ["ANTI INVALID"] = false,
+    ["ANTI FLING"] = false,
+    ["ANIM ANTIGA"] = false,
+    ["CONFETE"] = false,
+    ["SOM DA ARMA"] = false,
+    ["SPEED"] = false,
+    ["SPEED RAW"] = false,
+    ["SPEED CWLLES"] = false,
+    ["BALAO DE CHAT OLD"] = false,
+    ["CORPO ANTIGO"] = false,
+    ["ANTI VOID"] = false,
+    ["CAELUS QUALITY"] = false,
+    ["KORBLOX BIEL"] = false,
+    ["2023 XP"] = false,
+    ["HOT BAR 2025"] = false,
+    ["2023 SHIFT"] = false,
+    ["2024 SHIFT"] = false,
+    ["HOT BAR TEXT"] = false,
+    ["2020 QUALITY"] = false,
+    ["2023 QUALITY"] = false,
+    ["WATERBALLOON"] = false,
+    ["TIRAR X DA GUN"] = false,
+    ["VOICE 2024"] = false
+}
+
+local buttons = {}
+local updateButton
+
+--========================================================
+-- BALAO DE CHAT OLD
+--========================================================
+
+local chatOldConnections = {}
+local baloesChat = {}
+
+local TEMPO_NA_TELA = 8
+local MAX_BALOES = 4
+local ALTURA_BASE = 1.83
+local DISTANCIA_ENTRE_BALOES = 0.83
+local DISTANCIA_MAXIMA = 100
+local DISTANCIA_PONTINHOS = 45
+
+local function calcularTamanhoChat(texto)
+    local bounds = TextService:GetTextSize(texto, 20, Enum.Font.SourceSans, Vector2.new(220, 1000))
+    local largura = math.clamp(bounds.X + 16, 36, 240)
+    local altura = math.clamp(bounds.Y + 8, 30, 120)
+    return largura, altura
+end
+
+local function reorganizarChat(plr)
+    local lista = baloesChat[plr]
+    if not lista then return end
+
+    for i, guiObj in ipairs(lista) do
+        if guiObj and guiObj.Parent then
+            local distanciaDoNovo = #lista - i
+            guiObj.StudsOffsetWorldSpace = Vector3.new(0, ALTURA_BASE + (distanciaDoNovo * DISTANCIA_ENTRE_BALOES), 0)
+
+            local balao = guiObj:FindFirstChild("Balao")
+            if balao then
+                local ponta = balao:FindFirstChild("Ponta")
+                if ponta then ponta.Visible = (i == #lista) end
+            end
+        end
+    end
+end
+
+local function removerBalaoChat(plr, guiObj)
+    local lista = baloesChat[plr]
+    if not lista then return end
+
+    for i, item in ipairs(lista) do
+        if item == guiObj then
+            table.remove(lista, i)
+            break
+        end
+    end
+
+    if guiObj and guiObj.Parent then guiObj:Destroy() end
+    reorganizarChat(plr)
+end
+
+local function criarBalaoChat(plr, texto)
+    if not states["BALAO DE CHAT OLD"] then return end
+    local character = plr.Character
+    if not character then return end
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+
+    baloesChat[plr] = baloesChat[plr] or {}
+    local lista = baloesChat[plr]
+
+    while #lista >= MAX_BALOES do
+        local antigo = table.remove(lista, 1)
+        if antigo then antigo:Destroy() end
+    end
+
+    local largura, altura = calcularTamanhoChat(texto)
+
+    local guiObj = Instance.new("BillboardGui")
+    guiObj.Name = "BalaoChatClassico"
+    guiObj.Adornee = head
+    guiObj.Size = UDim2.fromOffset(largura, altura + 12)
+    guiObj.AlwaysOnTop = false
+    guiObj.MaxDistance = DISTANCIA_MAXIMA
+    guiObj.Parent = head
+
+    local balao = Instance.new("Frame")
+    balao.Name = "Balao"
+    balao.AnchorPoint = Vector2.new(0.5, 0)
+    balao.Position = UDim2.new(0.5, 0, 0, 0)
+    balao.Size = UDim2.fromOffset(largura, altura)
+    balao.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    balao.BorderSizePixel = 0
+    balao.ZIndex = 2
+    balao.Parent = guiObj
+
+    local canto = Instance.new("UICorner")
+    canto.CornerRadius = UDim.new(0, 4)
+    canto.Parent = balao
+
+    local label = Instance.new("TextLabel")
+    label.Name = "Texto"
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, -8, 1, 0)
+    label.Position = UDim2.new(0, 4, 0, 0)
+    label.Text = texto
+    label.TextColor3 = Color3.fromRGB(57, 68, 76)
+    label.TextSize = 20
+    label.Font = Enum.Font.SourceSans
+    label.TextWrapped = true
+    label.TextXAlignment = Enum.TextXAlignment.Center
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.ZIndex = 5
+    label.Parent = balao
+
+    local ponta = Instance.new("Frame")
+    ponta.Name = "Ponta"
+    ponta.AnchorPoint = Vector2.new(0.5, 0.5)
+    ponta.Position = UDim2.new(0.5, 0, 1, 0)
+    ponta.Size = UDim2.fromOffset(16, 14)
+    ponta.Rotation = 45
+    ponta.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ponta.BorderSizePixel = 0
+    ponta.ZIndex = 1
+    ponta.Parent = balao
+
+    local conexaoDistancia
+    conexaoDistancia = RunService.RenderStepped:Connect(function()
+        if not guiObj or not guiObj.Parent or not head then
+            conexaoDistancia:Disconnect()
+            return
+        end
+
+        local camera = Workspace.CurrentCamera
+        if not camera then return end
+
+        local dist = (camera.CFrame.Position - head.Position).Magnitude
+
+        if dist >= DISTANCIA_PONTINHOS then
+            label.Text = "..."
+            label.TextSize = 24
+            balao.Size = UDim2.fromOffset(45, 28)
+            guiObj.Size = UDim2.fromOffset(45, 40)
+        else
+            label.Text = texto
+            label.TextSize = 20
+            balao.Size = UDim2.fromOffset(largura, altura)
+            guiObj.Size = UDim2.fromOffset(largura, altura + 12)
+        end
+    end)
+
+    table.insert(lista, guiObj)
+    reorganizarChat(plr)
+
+    task.delay(TEMPO_NA_TELA, function()
+        if conexaoDistancia then conexaoDistancia:Disconnect() end
+        if guiObj and guiObj.Parent then removerBalaoChat(plr, guiObj) end
+    end)
+end
+
+local function balaoChatOldOn()
+    local bubbleConfig = TextChatService:FindFirstChildOfClass("BubbleChatConfiguration")
+    if bubbleConfig then bubbleConfig.Enabled = false end
+
+    table.insert(chatOldConnections, TextChatService.MessageReceived:Connect(function(message)
+        if not message.TextSource then return end
+        local plr = Players:GetPlayerByUserId(message.TextSource.UserId)
+        if plr then criarBalaoChat(plr, message.Text) end
+    end))
+
+    table.insert(chatOldConnections, Players.PlayerRemoving:Connect(function(plr)
+        baloesChat[plr] = nil
+    end))
+
+    print("✅ BALAO DE CHAT OLD ON")
+end
+
+local function balaoChatOldOff()
+    for _, conn in ipairs(chatOldConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    chatOldConnections = {}
+
+    for plr, lista in pairs(baloesChat) do
+        for _, guiObj in ipairs(lista) do
+            if guiObj and guiObj.Parent then guiObj:Destroy() end
+        end
+    end
+    table.clear(baloesChat)
+
+    local bubbleConfig = TextChatService:FindFirstChildOfClass("BubbleChatConfiguration")
+    if bubbleConfig then bubbleConfig.Enabled = true end
+
+    print("❌ BALAO DE CHAT OLD OFF")
+end
+
+--========================================================
+-- SPEED RAW
+--========================================================
+
+local speedRawConnections = {}
+local activeGhostRaw, activeWeldRaw
+local currentOffsetRaw = CFrame.new(0, 0, 0)
+
+local function deployGhostGlitchRaw()
+    if not states["SPEED RAW"] then return end
+    local char = player.Character
+    if not char then return end
+
+    local cachedRoot = char:FindFirstChild("HumanoidRootPart")
+    local cachedTorso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+    if not cachedTorso or not cachedRoot then return end
+
+    local rawCF = cachedRoot.CFrame:ToObjectSpace(cachedTorso.CFrame)
+    currentOffsetRaw = CFrame.new(rawCF.Position * 1.9) * rawCF.Rotation
+
+    local oldGhost = char:FindFirstChild("Skibidi_Ghost_Active")
+    if oldGhost then oldGhost:Destroy() end
+
+    local newGhost = Instance.new("Part")
+    newGhost.Name = "Skibidi_Ghost_Active"
+    newGhost.Size = Vector3.new(1, 1, 1)
+
+    local targetMass = 13
+    local volume = newGhost.Size.X * newGhost.Size.Y * newGhost.Size.Z
+    local requiredDensity = targetMass / volume
+
+    newGhost.CustomPhysicalProperties = PhysicalProperties.new(requiredDensity, 0.7, 0.3, 1, 1)
+    newGhost.CFrame = cachedTorso.CFrame 
+    newGhost.Transparency = 1 
+    newGhost.CanCollide = false
+    newGhost.Parent = char
+
+    activeWeldRaw = Instance.new("Weld")
+    activeWeldRaw.Part0 = cachedTorso
+    activeWeldRaw.Part1 = newGhost
+    activeWeldRaw.C0 = currentOffsetRaw
+    activeWeldRaw.Parent = newGhost
+
+    activeGhostRaw = newGhost
+end
+
+local function speedRawOn()
+    if states["SPEED"] then states["SPEED"] = false; if offFunctions and offFunctions["SPEED"] then offFunctions["SPEED"]() end; updateButton("SPEED") end
+    if states["SPEED CWLLES"] then states["SPEED CWLLES"] = false; if offFunctions and offFunctions["SPEED CWLLES"] then offFunctions["SPEED CWLLES"]() end; updateButton("SPEED CWLLES") end
+
+    local function setupListeners(char)
+        if not char then return end
+        local humanoid = char:FindFirstChild("Humanoid")
+        if humanoid then
+            table.insert(speedRawConnections, humanoid.Died:Connect(function()
+                activeGhostRaw = nil
+                activeWeldRaw = nil
+            end))
+        end
+
+        task.defer(deployGhostGlitchRaw)
+
+        table.insert(speedRawConnections, char.ChildAdded:Connect(function(child)
+            if not states["SPEED RAW"] then return end
+            if child:IsA("Tool") or string.find(string.lower(child.Name), "radio") then 
+                for _, part in ipairs(child:GetDescendants()) do
+                    if part:IsA("BasePart") then part.Massless = true end
+                end
+                deployGhostGlitchRaw() 
+            end
+        end))
+
+        table.insert(speedRawConnections, char.ChildRemoved:Connect(function(child)
+            if not states["SPEED RAW"] then return end
+            if child:IsA("Tool") or string.find(string.lower(child.Name), "radio") then 
+                deployGhostGlitchRaw() 
+            end
+        end))
+    end
+
+    if player.Character then setupListeners(player.Character) end
+    table.insert(speedRawConnections, player.CharacterAdded:Connect(setupListeners))
+
+    table.insert(speedRawConnections, RunService.Heartbeat:Connect(function()
+        if not states["SPEED RAW"] then return end
+        if activeWeldRaw then
+            activeWeldRaw.C0 = currentOffsetRaw
+        else
+            if player.Character and (not activeGhostRaw or activeGhostRaw.Parent ~= player.Character) then
+                deployGhostGlitchRaw()
+            end
+        end
+    end))
+
+    print("✅ SPEED RAW ON")
+end
+
+local function speedRawOff()
+    for _, conn in ipairs(speedRawConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    speedRawConnections = {}
+
+    if activeGhostRaw then pcall(function() activeGhostRaw:Destroy() end) end
+    activeGhostRaw = nil
+    activeWeldRaw = nil
+
+    print("❌ SPEED RAW OFF")
+end
+
+--========================================================
+-- SPEED CWLLES
+--========================================================
+
+local speedCwllesConnections = {}
+
+local function aplicarCwlles(character)
+    if not character or not states["SPEED CWLLES"] then return end
+
+    local humanoid = character:WaitForChild("Humanoid", 10)
+    local rootPart = character:WaitForChild("HumanoidRootPart", 10)
+    if not humanoid or not rootPart then return end
+
+    if character:FindFirstChild("GlitchPart") then
+        character.GlitchPart:Destroy()
+    end
+
+    local glitchPart = Instance.new("Part")
+    glitchPart.Name = "GlitchPart"
+    glitchPart.Size = Vector3.new(2, 2, 2)
+    glitchPart.Transparency = 1
+    glitchPart.CanCollide = false
+    glitchPart.CanTouch = false
+    glitchPart.CanQuery = false
+    glitchPart.Anchored = false
+    glitchPart.Massless = false
+    glitchPart.Parent = character
+
+    local weld = Instance.new("Weld")
+    weld.Part0 = rootPart
+    weld.Part1 = glitchPart
+    weld.C0 = CFrame.new(0, 0, 0)
+    weld.Parent = glitchPart
+
+    local escalando = false
+
+    local function setOffset(z) weld.C0 = CFrame.new(0, 0, z) end
+    local function deslocarMassa() setOffset(10.5) end
+    local function resetarMassa() setOffset(0) end
+
+    table.insert(speedCwllesConnections, humanoid.StateChanged:Connect(function(_, newState)
+        escalando = (newState == Enum.HumanoidStateType.Climbing)
+    end))
+
+    table.insert(speedCwllesConnections, character.ChildAdded:Connect(function(obj)
+        if obj:IsA("Tool") then
+            if escalando then deslocarMassa() else resetarMassa() end
+        end
+    end))
+
+    table.insert(speedCwllesConnections, character.ChildRemoved:Connect(function(obj)
+        if obj:IsA("Tool") and not escalando then resetarMassa() end
+    end))
+
+    local backpack = player:WaitForChild("Backpack", 5)
+    if backpack then
+        table.insert(speedCwllesConnections, backpack.ChildAdded:Connect(function(obj)
+            if obj:IsA("Tool") and not escalando then resetarMassa() end
+        end))
+        table.insert(speedCwllesConnections, backpack.ChildRemoved:Connect(function(obj)
+            if obj:IsA("Tool") and not escalando then resetarMassa() end
+        end))
+    end
+end
+
+local function speedCwllesOn()
+    if states["SPEED"] then states["SPEED"] = false; if offFunctions and offFunctions["SPEED"] then offFunctions["SPEED"]() end; updateButton("SPEED") end
+    if states["SPEED RAW"] then states["SPEED RAW"] = false; if offFunctions and offFunctions["SPEED RAW"] then offFunctions["SPEED RAW"]() end; updateButton("SPEED RAW") end
+
+    if player.Character then aplicarCwlles(player.Character) end
+    table.insert(speedCwllesConnections, player.CharacterAdded:Connect(aplicarCwlles))
+
+    print("✅ SPEED CWLLES ON")
+end
+
+local function speedCwllesOff()
+    for _, conn in ipairs(speedCwllesConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    speedCwllesConnections = {}
+
+    if player.Character and player.Character:FindFirstChild("GlitchPart") then
+        pcall(function() player.Character.GlitchPart:Destroy() end)
+    end
+
+    print("❌ SPEED CWLLES OFF")
+end
+
+--========================================================
+-- 2023 QUALITY
+--========================================================
+
+local quality2023Connections = {}
+local originalLightBrightness = {}
+
+local function ajustarLuzes2023()
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+            if not originalLightBrightness[v] then
+                originalLightBrightness[v] = v.Brightness
+            end
+            v.Brightness = originalLightBrightness[v] * 0.5
+        end
+    end
+end
+
+local function quality2023On()
+    ajustarLuzes2023()
+
+    table.insert(quality2023Connections, player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        if states["2023 QUALITY"] then
+            ajustarLuzes2023()
+        end
+    end))
+
+    table.insert(quality2023Connections, Workspace.DescendantAdded:Connect(function(v)
+        if states["2023 QUALITY"] and (v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
+            task.wait()
+            if not originalLightBrightness[v] then
+                originalLightBrightness[v] = v.Brightness
+            end
+            v.Brightness = originalLightBrightness[v] * 0.5
+        end
+    end))
+
+    print("✅ 2023 QUALITY ON")
+end
+
+local function quality2023Off()
+    for _, conn in ipairs(quality2023Connections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    quality2023Connections = {}
+
+    for light, origBrightness in pairs(originalLightBrightness) do
+        if light and light.Parent then
+            light.Brightness = origBrightness
+        end
+    end
+    originalLightBrightness = {}
+
+    print("❌ 2023 QUALITY OFF")
+end
+
+--========================================================
+-- 2020 QUALITY
+--========================================================
+
+local qualityConnections = {}
+local origLightingSettings = {}
+local disabledLightsList = {}
+
+local function quality2020On()
+    origLightingSettings = {
+        Technology = Lighting.Technology,
+        GlobalShadows = Lighting.GlobalShadows,
+        Brightness = Lighting.Brightness,
+        ClockTime = Lighting.ClockTime,
+        ExposureCompensation = Lighting.ExposureCompensation,
+        Ambient = Lighting.Ambient,
+        OutdoorAmbient = Lighting.OutdoorAmbient,
+        FogStart = Lighting.FogStart,
+        FogEnd = Lighting.FogEnd,
+        FogColor = Lighting.FogColor,
+        EnvironmentDiffuseScale = Lighting.EnvironmentDiffuseScale,
+        EnvironmentSpecularScale = Lighting.EnvironmentSpecularScale,
+        ColorShift_Top = Lighting.ColorShift_Top,
+        ColorShift_Bottom = Lighting.ColorShift_Bottom
+    }
+
+    for _, v in ipairs(Lighting:GetChildren()) do
+        if v:IsA("Atmosphere") or v:IsA("BloomEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("DepthOfFieldEffect") then
+            v:Destroy()
+        end
+    end
+
+    pcall(function() Lighting.Technology = Enum.Technology.Compatibility end)
+    Lighting.GlobalShadows = false
+    Lighting.Brightness = 2.12
+    Lighting.ClockTime = 14
+    Lighting.ExposureCompensation = 0
+    Lighting.Ambient = Color3.fromRGB(148, 148, 148)
+    Lighting.OutdoorAmbient = Color3.fromRGB(148, 148, 148)
+    Lighting.FogStart = 100000
+    Lighting.FogEnd = 100000
+    Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.EnvironmentSpecularScale = 0
+
+    pcall(function()
+        Lighting.ColorShift_Top = Color3.new(0, 0, 0)
+        Lighting.ColorShift_Bottom = Color3.new(0, 0, 0)
+    end)
+
+    table.insert(qualityConnections, Lighting.ChildAdded:Connect(function(obj)
+        if not states["2020 QUALITY"] then return end
+        if obj:IsA("Atmosphere") or obj:IsA("BloomEffect") or obj:IsA("SunRaysEffect") or obj:IsA("ColorCorrectionEffect") or obj:IsA("DepthOfFieldEffect") then
+            task.wait()
+            if obj.Parent then obj:Destroy() end
+        end
+    end))
+
+    local function disableLight(obj)
+        if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+            if obj.Enabled then
+                disabledLightsList[obj] = true
+                obj.Enabled = false
+            end
+        end
+    end
+
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        disableLight(obj)
+    end
+
+    table.insert(qualityConnections, Workspace.DescendantAdded:Connect(function(obj)
+        if states["2020 QUALITY"] then
+            disableLight(obj)
+        end
+    end))
+
+    print("✅ 2020 QUALITY ON")
+end
+
+local function quality2020Off()
+    for _, conn in ipairs(qualityConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    qualityConnections = {}
+
+    if origLightingSettings.Technology then
+        pcall(function() Lighting.Technology = origLightingSettings.Technology end)
+        Lighting.GlobalShadows = origLightingSettings.GlobalShadows
+        Lighting.Brightness = origLightingSettings.Brightness
+        Lighting.ClockTime = origLightingSettings.ClockTime
+        Lighting.ExposureCompensation = origLightingSettings.ExposureCompensation
+        Lighting.Ambient = origLightingSettings.Ambient
+        Lighting.OutdoorAmbient = origLightingSettings.OutdoorAmbient
+        Lighting.FogStart = origLightingSettings.FogStart
+        Lighting.FogEnd = origLightingSettings.FogEnd
+        Lighting.FogColor = origLightingSettings.FogColor
+        Lighting.EnvironmentDiffuseScale = origLightingSettings.EnvironmentDiffuseScale
+        Lighting.EnvironmentSpecularScale = origLightingSettings.EnvironmentSpecularScale
+        pcall(function()
+            Lighting.ColorShift_Top = origLightingSettings.ColorShift_Top
+            Lighting.ColorShift_Bottom = origLightingSettings.ColorShift_Bottom
+        end)
+    end
+
+    for light, _ in pairs(disabledLightsList) do
+        if light and light.Parent then
+            light.Enabled = true
+        end
+    end
+    disabledLightsList = {}
+
+    print("❌ 2020 QUALITY OFF")
+end
+
+--========================================================
+-- CAELUS QUALITY (NOVO)
+--========================================================
+
+local caelusConnections = {}
+
+local function ajustarObjetoCaelus(obj)
+    if not states["CAELUS QUALITY"] then return end
+    if obj:IsA("PointLight") or obj:IsA("SurfaceLight") or obj:IsA("SpotLight") then
+        obj.Brightness = 0.5
+    elseif obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
+        if obj.Color.G > 0.6 and obj.Color.B > 0.8 then
+            obj.Color = Color3.fromRGB(0, 210, 255)
+        end
+    end
+end
+
+local function caelusQualityOn()
+    Lighting:ClearAllChildren()
+
+    Lighting.Technology = Enum.Technology.Compatibility
+    Lighting.GlobalShadows = true
+    Lighting.Brightness = 1.4
+    Lighting.ClockTime = 14
+    Lighting.Ambient = Color3.fromRGB(145, 145, 145)
+    Lighting.OutdoorAmbient = Color3.fromRGB(150, 150, 150)
+    Lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.EnvironmentSpecularScale = 0
+
+    MaterialService.Use2022Materials = false
+
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        ajustarObjetoCaelus(obj)
+    end
+
+    table.insert(caelusConnections, Workspace.DescendantAdded:Connect(ajustarObjetoCaelus))
+
+    print("✅ CAELUS QUALITY ON")
+end
+
+local function caelusQualityOff()
+    for _, conn in ipairs(caelusConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    caelusConnections = {}
+
+    print("❌ CAELUS QUALITY OFF")
+end
+
+--========================================================
+-- TIRAR X DA GUN
+--========================================================
+
+local cleanGunConnections = {}
+
+local function processGunChild(child)
+    if not states["TIRAR X DA GUN"] then return end
+    if child:IsA("BillboardGui") or child:IsA("SurfaceGui") then
+        child.Enabled = false
+        table.insert(cleanGunConnections, child:GetPropertyChangedSignal("Enabled"):Connect(function()
+            if states["TIRAR X DA GUN"] then child.Enabled = false end
+        end))
+    elseif child:IsA("ImageLabel") or child:IsA("ImageButton") or child:IsA("Decal") then
+        if child.Name:lower() == "x" or child.Name:lower():find("cross") or child.Name:lower():find("block") then
+            child.Visible = false
+            child.Transparency = 1
+        end
+    end
+end
+
+local function cleanWeaponX(tool)
+    if not tool:IsA("Tool") or not states["TIRAR X DA GUN"] then return end
+
+    for _, descendant in ipairs(tool:GetDescendants()) do
+        processGunChild(descendant)
+    end
+
+    table.insert(cleanGunConnections, tool.DescendantAdded:Connect(processGunChild))
+end
+
+local function setupCharacterGun(char)
+    if not char then return end
+
+    table.insert(cleanGunConnections, char.ChildAdded:Connect(cleanWeaponX))
+    for _, child in pairs(char:GetChildren()) do
+        cleanWeaponX(child)
+    end
+end
+
+local function tirarXGunOn()
+    if player.Character then setupCharacterGun(player.Character) end
+    table.insert(cleanGunConnections, player.CharacterAdded:Connect(setupCharacterGun))
+
+    print("✅ TIRAR X DA GUN ON")
+end
+
+local function tirarXGunOff()
+    for _, conn in ipairs(cleanGunConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    cleanGunConnections = {}
+
+    print("❌ TIRAR X DA GUN OFF")
+end
+
+--========================================================
+-- VOICE 2024
+--========================================================
+
+local voiceConnections = {}
+local VOICE_TAMANHO = 125
+local VOICE_ALTURA = 1.90
+
+local function criarBalaoVoice(character)
+    if not character or not states["VOICE 2024"] then return end
+    local head = character:WaitForChild("Head", 5)
+    if not head then return end
+
+    local antigo = head:FindFirstChild("BalaoMicrofone")
+    if antigo then antigo:Destroy() end
+
+    local guiObj = Instance.new("BillboardGui")
+    guiObj.Name = "BalaoMicrofone"
+    guiObj.Adornee = head
+    guiObj.Size = UDim2.fromOffset(VOICE_TAMANHO, VOICE_TAMANHO)
+    guiObj.StudsOffset = Vector3.new(0, VOICE_ALTURA, 0)
+    guiObj.AlwaysOnTop = true
+    guiObj.Parent = head
+
+    local imagem = Instance.new("ImageLabel")
+    imagem.Size = UDim2.fromScale(1, 1)
+    imagem.BackgroundTransparency = 1
+    imagem.Image = "rbxassetid://97042668009790"
+    imagem.Parent = guiObj
+end
+
+local function voice2024On()
+    if player.Character then criarBalaoVoice(player.Character) end
+
+    table.insert(voiceConnections, player.CharacterAdded:Connect(function(char)
+        criarBalaoVoice(char)
+    end))
+
+    print("✅ VOICE 2024 ON")
+end
+
+local function voice2024Off()
+    for _, conn in ipairs(voiceConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    voiceConnections = {}
+
+    if player.Character then
+        local head = player.Character:FindFirstChild("Head")
+        if head then
+            local balao = head:FindFirstChild("BalaoMicrofone")
+            if balao then balao:Destroy() end
+        end
+    end
+
+    print("❌ VOICE 2024 OFF")
+end
+
+--========================================================
+-- KORBLOX BIEL (R15 / R6)
+--========================================================
+
+local korbloxBielConnections = {}
+
+local function applyKorbloxBiel()
+    if not states["KORBLOX BIEL"] then return end
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid", 5)
+
+    if not hum or char:FindFirstChild("KorbloxFolder") then 
+        return 
+    end
+
+    local folder = Instance.new("Folder")
+    folder.Name = "KorbloxFolder"
+    folder.Parent = char
+
+    if hum.RigType == Enum.HumanoidRigType.R15 then
+        local ru = char:WaitForChild("RightUpperLeg", 3)
+        local rl = char:WaitForChild("RightLowerLeg", 3)
+        local rf = char:WaitForChild("RightFoot", 3)
+
+        if not (ru and rl and rf) then return end
+
+        ru.Transparency = 1
+        rl.Transparency = 1
+        rf.Transparency = 1
+
+        local korbloxPart = Instance.new("Part")
+        korbloxPart.Name = "KorbloxR15Visual"
+        korbloxPart.Size = Vector3.new(1, 2, 1)
+        korbloxPart.CanCollide = false
+        korbloxPart.Massless = true
+        korbloxPart.Parent = folder
+
+        local mesh = Instance.new("SpecialMesh")
+        mesh.MeshId = "rbxassetid://902942096"
+        mesh.TextureId = "rbxassetid://902843398"
+        mesh.Scale = Vector3.new(1, 1, 1)
+        mesh.Parent = korbloxPart
+
+        local weld = Instance.new("Weld")
+        weld.Part0 = ru
+        weld.Part1 = korbloxPart
+        weld.C0 = CFrame.new(0.1, 0.2, 0) 
+        weld.Parent = korbloxPart
+
+    elseif hum.RigType == Enum.HumanoidRigType.R6 then
+        local rightLeg = char:WaitForChild("Right Leg", 3)
+        if not rightLeg then return end
+
+        for _, v in ipairs(char:GetChildren()) do
+            if v:IsA("CharacterMesh") and v.BodyPart == Enum.BodyPart.RightLeg then
+                v:Destroy()
+            end
+        end
+
+        rightLeg.Transparency = 1
+
+        local korbloxLeg = Instance.new("Part")
+        korbloxLeg.Name = "KorbloxR6Visual"
+        korbloxLeg.Size = Vector3.new(1, 2, 1)
+        korbloxLeg.CanCollide = false
+        korbloxLeg.Massless = true
+        korbloxLeg.Parent = folder
+
+        local mesh = Instance.new("SpecialMesh")
+        mesh.MeshType = Enum.MeshType.FileMesh
+        mesh.MeshId = "rbxassetid://101851696"
+        mesh.TextureId = "rbxassetid://101851254"
+        mesh.Scale = Vector3.new(1, 1, 1)
+        mesh.Parent = korbloxLeg
+
+        local weld = Instance.new("Weld")
+        weld.Part0 = rightLeg
+        weld.Part1 = korbloxLeg
+        weld.C0 = CFrame.new(0, 0, 0)
+        weld.Parent = korbloxLeg
+    end
+end
+
+local function korbloxBielOn()
+    if player.Character then
+        task.spawn(applyKorbloxBiel)
+    end
+
+    table.insert(korbloxBielConnections, player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        applyKorbloxBiel()
+    end))
+
+    print("✅ KORBLOX BIEL ON")
+end
+
+local function korbloxBielOff()
+    for _, conn in ipairs(korbloxBielConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    korbloxBielConnections = {}
+
+    local char = player.Character
+    if char then
+        local folder = char:FindFirstChild("KorbloxFolder")
+        if folder then folder:Destroy() end
+
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then
+            if hum.RigType == Enum.HumanoidRigType.R15 then
+                for _, name in ipairs({"RightUpperLeg", "RightLowerLeg", "RightFoot"}) do
+                    local part = char:FindFirstChild(name)
+                    if part then part.Transparency = 0 end
+                end
+            elseif hum.RigType == Enum.HumanoidRigType.R6 then
+                local rl = char:FindFirstChild("Right Leg")
+                if rl then rl.Transparency = 0 end
+            end
+        end
+    end
+
+    print("❌ KORBLOX BIEL OFF")
+end
+
+--========================================================
+-- WATERBALLOON
+--========================================================
+
+local waterballoonConnections = {}
+local waterballoonThread
+local WATERBALLOON_IMAGE_ID = "rbxassetid://89108586792149"
+local THROW_ANIMATION_ID = "rbxassetid://18324269091"
+local COOLDOWN_TIME = 2.5
+local HIDE_DELAY = 0.6
+local canThrowBalloon = true
+
+local function createWaterballoonTool()
+    if not states["WATERBALLOON"] then return end
+    local backpack = player:WaitForChild("Backpack", 5)
+    if not backpack then return end
+
+    if backpack:FindFirstChild("waterballoon") or (player.Character and player.Character:FindFirstChild("waterballoon")) then
+        return
+    end
+
+    local tool = Instance.new("Tool")
+    tool.Name = "waterballoon"
+    tool.RequiresHandle = true
+    tool.CanBeDropped = false
+    tool.TextureId = WATERBALLOON_IMAGE_ID
+    tool.Grip = CFrame.new(0.2, 0, 0) * CFrame.Angles(0, 0, math.rad(90))
+
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(1.2, 1.2, 1.2)
+    handle.CanCollide = false
+    handle.CanTouch = false
+    handle.CanQuery = false
+    handle.Massless = true
+    handle.Color = Color3.fromRGB(235, 64, 88)
+    handle.Material = Enum.Material.SmoothPlastic
+    handle.Parent = tool
+
+    local mesh = Instance.new("SpecialMesh")
+    mesh.MeshId = "rbxassetid://137510221029430"
+    mesh.Scale = Vector3.new(0.45, 0.45, 0.45)
+    mesh.Parent = handle
+
+    local throwTrack
+
+    local function loadAnimation()
+        local character = player.Character
+        if not character then return end
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+
+        local animation = Instance.new("Animation")
+        animation.AnimationId = THROW_ANIMATION_ID
+
+        pcall(function()
+            throwTrack = animator:LoadAnimation(animation)
+        end)
+    end
+
+    loadAnimation()
+
+    tool.Activated:Connect(function()
+        if not canThrowBalloon or not tool.Parent then return end
+        canThrowBalloon = false
+
+        if not throwTrack then loadAnimation() end
+        if throwTrack then pcall(function() throwTrack:Play() end) end
+
+        task.wait(HIDE_DELAY)
+        if handle and handle.Parent then handle.Transparency = 1 end
+
+        task.wait(math.max(0, COOLDOWN_TIME - HIDE_DELAY))
+        if handle and handle.Parent then handle.Transparency = 0 end
+
+        canThrowBalloon = true
+    end)
+
+    tool.Parent = backpack
+end
+
+local function removeWaterballoonTool()
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        local item = backpack:FindFirstChild("waterballoon")
+        if item then item:Destroy() end
+    end
+    if player.Character then
+        local item = player.Character:FindFirstChild("waterballoon")
+        if item then item:Destroy() end
+    end
+end
+
+local function waterballoonOn()
+    canThrowBalloon = true
+    createWaterballoonTool()
+
+    table.insert(waterballoonConnections, player.CharacterAdded:Connect(function()
+        task.wait(1)
+        canThrowBalloon = true
+        createWaterballoonTool()
+    end))
+
+    waterballoonThread = task.spawn(function()
+        while states["WATERBALLOON"] do
+            task.wait(2)
+            local backpack = player:FindFirstChild("Backpack")
+            if backpack then
+                local hasTool = backpack:FindFirstChild("waterballoon") or (player.Character and player.Character:FindFirstChild("waterballoon"))
+                if not hasTool then createWaterballoonTool() end
+            end
+        end
+    end)
+
+    print("✅ WATERBALLOON ON")
+end
+
+local function waterballoonOff()
+    for _, conn in ipairs(waterballoonConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    waterballoonConnections = {}
+
+    if waterballoonThread then
+        task.cancel(waterballoonThread)
+        waterballoonThread = nil
+    end
+
+    removeWaterballoonTool()
+    print("❌ WATERBALLOON OFF")
+end
+
+--========================================================
+-- ANTI FLING
+--========================================================
+
+local function antiFlingOn()
+    pcall(function()
+        loadstring(game:HttpGet(
+            "https://rawscripts.net/raw/Universal-Script-Anti-fling-73205"
+        ))()
+    end)
+    print("✅ ANTI FLING ON")
+end
+
+local function antiFlingOff()
+    print("❌ ANTI FLING OFF")
+end
+
+--========================================================
+-- ANIM ANTIGA
+--========================================================
+
+local originalRetargeting
+
+pcall(function()
+    originalRetargeting = workspace.Retargeting
+end)
+
+local function animAntigaOn()
+    pcall(function()
+        workspace.Retargeting = Enum.AnimatorRetargetingMode.Disabled
+    end)
+    print("✅ ANIM ANTIGA ON")
+end
+
+local function animAntigaOff()
+    pcall(function()
+        if originalRetargeting then
+            workspace.Retargeting = originalRetargeting
+        end
+    end)
+    print("❌ ANIM ANTIGA OFF")
+end
+
+--========================================================
+-- CONFETE
+--========================================================
+
+local confeteConnections = {}
+local LAG_DURATION = 1
+local REPLICATION_LAG = 0.6
+
+local function simulateLag()
+    if not states["CONFETE"] then return end
+    local NetworkSettings = settings():GetService("NetworkSettings")
+
+    pcall(function()
+        NetworkSettings.IncomingReplicationLag = REPLICATION_LAG
+        NetworkSettings.OutgoingReplicationLag = REPLICATION_LAG
+    end)
+
+    task.delay(LAG_DURATION, function()
+        pcall(function()
+            NetworkSettings.IncomingReplicationLag = 0
+            NetworkSettings.OutgoingReplicationLag = 0
+        end)
+    end)
+end
+
+local function monitorConfete(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 5)
+    if not humanoid then return end
+
+    table.insert(confeteConnections, humanoid.Died:Connect(simulateLag))
+end
+
+local function confeteOff()
+    for _, connection in ipairs(confeteConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    confeteConnections = {}
+
+    local NetworkSettings = settings():GetService("NetworkSettings")
+    pcall(function()
+        NetworkSettings.IncomingReplicationLag = 0
+        NetworkSettings.OutgoingReplicationLag = 0
+    end)
+
+    print("❌ CONFETE OFF")
+end
+
+local function confeteOn()
+    confeteOff()
+    states["CONFETE"] = true
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.Character then monitorConfete(plr.Character) end
+        table.insert(confeteConnections, plr.CharacterAdded:Connect(monitorConfete))
+    end
+
+    table.insert(confeteConnections, Players.PlayerAdded:Connect(function(plr)
+        table.insert(confeteConnections, plr.CharacterAdded:Connect(monitorConfete))
+    end))
+
+    print("✅ CONFETE ON")
+end
+
+--========================================================
+-- SOM DA ARMA
+--========================================================
+
+local weaponSound
+local weaponConnections = {}
+local SOUND_ID = "rbxassetid://6968135315"
+local TARGET_TOOL_NAME = "Gun"
+local COOLDOWN_DURATION = 5
+
+local function weaponSoundOn()
+    weaponSound = Instance.new("Sound")
+    weaponSound.SoundId = SOUND_ID
+    weaponSound.Volume = 1
+    weaponSound.Parent = SoundService
+
+    local function setupCharacter(character)
+        local humanoid = character:WaitForChild("Humanoid", 10)
+        local animator = humanoid and humanoid:WaitForChild("Animator", 10)
+        if not animator then return end
+
+        local lastUnequippedTime = 0
+
+        table.insert(weaponConnections, animator.AnimationPlayed:Connect(function(track)
+            if not states["SOM DA ARMA"] then return end
+            local tool = character:FindFirstChildOfClass("Tool")
+            local isHoldingGun = tool and tool.Name == TARGET_TOOL_NAME
+            local timeSinceUnequip = tick() - lastUnequippedTime
+
+            if (isHoldingGun or timeSinceUnequip <= COOLDOWN_DURATION) and track.Priority == Enum.AnimationPriority.Action then
+                track:Stop()
+            end
+        end))
+
+        table.insert(weaponConnections, character.ChildAdded:Connect(function(child)
+            if child:IsA("Tool") and child.Name == TARGET_TOOL_NAME and weaponSound then
+                weaponSound:Play()
+            end
+        end))
+
+        table.insert(weaponConnections, character.ChildRemoved:Connect(function(child)
+            if child:IsA("Tool") and child.Name == TARGET_TOOL_NAME then
+                if weaponSound then weaponSound:Play() end
+                lastUnequippedTime = tick()
+            end
+        end))
+    end
+
+    if player.Character then setupCharacter(player.Character) end
+    table.insert(weaponConnections, player.CharacterAdded:Connect(setupCharacter))
+
+    print("✅ SOM DA ARMA ON")
+end
+
+local function weaponSoundOff()
+    for _, connection in ipairs(weaponConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    weaponConnections = {}
+
+    if weaponSound then
+        weaponSound:Destroy()
+        weaponSound = nil
+    end
+
+    print("❌ SOM DA ARMA OFF")
+end
+
+--========================================================
+-- SPEED
+--========================================================
+
+local activeGhost
+local activeWeld
+local currentOffset = CFrame.new()
+local speedConnections = {}
+
+local function isGlitchTarget(child)
+    if child:IsA("Tool") then return true end
+    return string.find(string.lower(child.Name), "radio") ~= nil
+end
+
+local function deployGhost()
+    if not states["SPEED"] then return end
+    local character = player.Character
+    if not character then return end
+
+    local root = character:FindFirstChild("HumanoidRootPart")
+    local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+    if not root or not torso then return end
+
+    local rawCF = root.CFrame:ToObjectSpace(torso.CFrame)
+    currentOffset = CFrame.new(rawCF.Position * 1.9) * rawCF.Rotation
+
+    if activeGhost then activeGhost:Destroy() end
+
+    local ghost = Instance.new("Part")
+    ghost.Name = "Skibidi_Ghost_Active"
+    ghost.Size = Vector3.new(1, 1, 1)
+    ghost.Transparency = 1
+    ghost.CanCollide = false
+    ghost.CustomPhysicalProperties = PhysicalProperties.new(20, 0.7, 0.3, 1, 1)
+    ghost.CFrame = torso.CFrame
+    ghost.Parent = character
+
+    local weld = Instance.new("Weld")
+    weld.Part0 = torso
+    weld.Part1 = ghost
+    weld.C0 = currentOffset
+    weld.Parent = ghost
+
+    activeGhost = ghost
+    activeWeld = weld
+end
+
+local function speedOn()
+    if states["SPEED RAW"] then states["SPEED RAW"] = false; if offFunctions and offFunctions["SPEED RAW"] then offFunctions["SPEED RAW"]() end; updateButton("SPEED RAW") end
+    if states["SPEED CWLLES"] then states["SPEED CWLLES"] = false; if offFunctions and offFunctions["SPEED CWLLES"] then offFunctions["SPEED CWLLES"]() end; updateButton("SPEED CWLLES") end
+
+    local function setupCharacter(character)
+        task.defer(function()
+            if states["SPEED"] then deployGhost() end
+        end)
+
+        table.insert(speedConnections, character.ChildAdded:Connect(function(child)
+            if not states["SPEED"] then return end
+            if isGlitchTarget(child) then
+                for _, part in ipairs(child:GetDescendants()) do
+                    if part:IsA("BasePart") then part.Massless = true end
+                end
+                deployGhost()
+            end
+        end))
+
+        table.insert(speedConnections, character.ChildRemoved:Connect(function(child)
+            if states["SPEED"] and isGlitchTarget(child) then deployGhost() end
+        end))
+    end
+
+    if player.Character then setupCharacter(player.Character) end
+    table.insert(speedConnections, player.CharacterAdded:Connect(setupCharacter))
+
+    table.insert(speedConnections, RunService.Heartbeat:Connect(function()
+        if not states["SPEED"] then return end
+        if activeWeld then
+            activeWeld.C0 = currentOffset
+        elseif player.Character then
+            deployGhost()
+        end
+    end))
+
+    print("✅ SPEED ON")
+end
+
+local function speedOff()
+    for _, connection in ipairs(speedConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    speedConnections = {}
+
+    if activeGhost then pcall(function() activeGhost:Destroy() end) end
+    activeGhost = nil
+    activeWeld = nil
+    currentOffset = CFrame.new()
+
+    print("❌ SPEED OFF")
+end
+
+--========================================================
+-- CORPO ANTIGO
+--========================================================
+
+local bodyConnections = {}
+local bodySession = 0
+
+local function applyBody(character, session)
+    if not character or session ~= bodySession or not states["CORPO ANTIGO"] then return end
+    local humanoid = character:WaitForChild("Humanoid", 10)
+    if session ~= bodySession or not states["CORPO ANTIGO"] or not humanoid or humanoid.RigType ~= Enum.HumanoidRigType.R15 then return end
+
+    humanoid.AutomaticScalingEnabled = false
+
+    local height = humanoid:FindFirstChild("BodyHeightScale")
+    local width = humanoid:FindFirstChild("BodyWidthScale")
+    local depth = humanoid:FindFirstChild("BodyDepthScale")
+    local head = humanoid:FindFirstChild("HeadScale")
+
+    if height then height.Value = 1 end
+    if width then width.Value = 1 end
+    if depth then depth.Value = 0.8 end
+    if head then head.Value = 1 end
+
+    task.wait(0.2)
+
+    if session ~= bodySession or not states["CORPO ANTIGO"] then
+        humanoid.AutomaticScalingEnabled = true
+        if height then height.Value = 1 end
+        if width then width.Value = 1 end
+        if depth then depth.Value = 1 end
+        if head then head.Value = 1 end
+        return
+    end
+
+    humanoid.AutomaticScalingEnabled = true
+end
+
+local function bodyOn()
+    bodySession += 1
+    local session = bodySession
+
+    for _, connection in ipairs(bodyConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    bodyConnections = {}
+
+    if player.Character then
+        task.spawn(function() applyBody(player.Character, session) end)
+    end
+
+    table.insert(bodyConnections, player.CharacterAdded:Connect(function(character)
+        if not states["CORPO ANTIGO"] then return end
+        local currentSession = bodySession
+        task.spawn(function() applyBody(character, currentSession) end)
+    end))
+
+    print("✅ CORPO ANTIGO ON")
+end
+
+local function bodyOff()
+    bodySession += 1
+    states["CORPO ANTIGO"] = false
+
+    for _, connection in ipairs(bodyConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    bodyConnections = {}
+
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.AutomaticScalingEnabled = true
+            local height = humanoid:FindFirstChild("BodyHeightScale")
+            local width = humanoid:FindFirstChild("BodyWidthScale")
+            local depth = humanoid:FindFirstChild("BodyDepthScale")
+            local head = humanoid:FindFirstChild("HeadScale")
+
+            if height then height.Value = 1 end
+            if width then width.Value = 1 end
+            if depth then depth.Value = 1 end
+            if head then head.Value = 1 end
+        end
+    end
+
+    print("❌ CORPO ANTIGO OFF")
+end
+
+--========================================================
+-- ANTI VOID
+--========================================================
+
+local antiVoidConnections = {}
+local VOID_Y = -450
+
+local function antiVoidOn()
+    local function setupCharacter(character)
+        local root = character:WaitForChild("HumanoidRootPart", 10)
+        if not root then return end
+
+        table.insert(antiVoidConnections, RunService.Heartbeat:Connect(function()
+            if not states["ANTI VOID"] or not root.Parent then return end
+            if root.Position.Y < VOID_Y then
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.CFrame = CFrame.new(root.Position.X, VOID_Y + 10, root.Position.Z)
+            end
+        end))
+    end
+
+    if player.Character then setupCharacter(player.Character) end
+    table.insert(antiVoidConnections, player.CharacterAdded:Connect(setupCharacter))
+
+    print("✅ ANTI VOID ON")
+end
+
+local function antiVoidOff()
+    for _, connection in ipairs(antiVoidConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    antiVoidConnections = {}
+
+    print("❌ ANTI VOID OFF")
+end
+
+--========================================================
+-- 2023 XP
+--========================================================
+
+local xpConnections = {}
+local originalPositions = {}
+
+local function configurarXP(obj)
+    if not obj:IsA("TextLabel") then return end
+
+    local function atualizar()
+        if not states["2023 XP"] then return end
+
+        if string.find(obj.Text:lower(), "xp") then
+            local pai = obj.Parent
+            if pai and pai:IsA("GuiObject") and not originalPositions[pai] then
+                originalPositions[pai] = pai.Position
+                pai.Position = pai.Position + UDim2.new(0, 0, 0, 35)
+            end
+        end
+
+        if string.match(obj.Text, "%dm%s*%d+s") and not originalPositions[obj] then
+            originalPositions[obj] = obj.Position
+            obj.Position = obj.Position + UDim2.new(0, 0, 0, 35)
+        end
+    end
+
+    table.insert(xpConnections, obj:GetPropertyChangedSignal("Text"):Connect(atualizar))
+    atualizar()
+end
+
+local function xp2023On()
+    for _, v in ipairs(player.PlayerGui:GetDescendants()) do
+        configurarXP(v)
+    end
+
+    table.insert(xpConnections, player.PlayerGui.DescendantAdded:Connect(configurarXP))
+    print("✅ 2023 XP ON")
+end
+
+local function xp2023Off()
+    for _, connection in ipairs(xpConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    xpConnections = {}
+
+    for element, pos in pairs(originalPositions) do
+        if element and element.Parent then
+            element.Position = pos
+        end
+    end
+    originalPositions = {}
+
+    print("❌ 2023 XP OFF")
+end
+
+--========================================================
+-- HOT BAR 2025
+--========================================================
+
+local hotbarConnections = {}
+
+local function createTool()
+    if not states["HOT BAR 2025"] then return end
+    local backpack = player:WaitForChild("Backpack", 5)
+    if not backpack then return end
+
+    if backpack:FindFirstChild("Emotes") or (player.Character and player.Character:FindFirstChild("Emotes")) then
+        return
+    end
+
+    local tool = Instance.new("Tool")
+    tool.RequiresHandle = false
+    tool.CanBeDropped = false
+
+    local lang = string.lower(player.LocaleId or "en-us")
+    local names = {
+        ["pt-br"] = "Emotes",
+        ["en-us"] = "Emotes",
+        ["es-es"] = "Emotes",
+        ["fr-fr"] = "Émotes",
+        ["de-de"] = "Emotes"
+    }
+
+    tool.Name = names[lang] or "Emotes"
+    tool.Parent = backpack
+
+    task.wait()
+
+    local tools = {}
+    for _, item in ipairs(backpack:GetChildren()) do
+        if item:IsA("Tool") then
+            table.insert(tools, item)
+        end
+    end
+
+    for i, t in ipairs(tools) do
+        if t == tool then
+            table.remove(tools, i)
+            break
+        end
+    end
+
+    table.insert(tools, 2, tool)
+
+    for _, t in ipairs(tools) do t.Parent = nil end
+    for _, t in ipairs(tools) do t.Parent = backpack end
+end
+
+local function removeTool()
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        local item = backpack:FindFirstChild("Emotes") or backpack:FindFirstChild("Émotes")
+        if item then item:Destroy() end
+    end
+    if player.Character then
+        local item = player.Character:FindFirstChild("Emotes") or player.Character:FindFirstChild("Émotes")
+        if item then item:Destroy() end
+    end
+end
+
+local function hotBar2025On()
+    createTool()
+
+    table.insert(hotbarConnections, player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        createTool()
+    end))
+
+    print("✅ HOT BAR 2025 ON")
+end
+
+local function hotBar2025Off()
+    for _, connection in ipairs(hotbarConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    hotbarConnections = {}
+
+    removeTool()
+    print("❌ HOT BAR 2025 OFF")
+end
+
+--========================================================
+-- 2023 SHIFT
+--========================================================
+
+local shift2023Connections = {}
+
+local function applyToHumanoid2023(hum)
+    if hum:IsA("Humanoid") then
+        hum.AutomaticScalingEnabled = false
+    end
+end
+
+local function scanCharacter2023(character)
+    if not character then return end
+    for _, obj in pairs(character:GetDescendants()) do
+        applyToHumanoid2023(obj)
+    end
+
+    table.insert(shift2023Connections, character.DescendantAdded:Connect(function(obj)
+        if states["2023 SHIFT"] then
+            applyToHumanoid2023(obj)
+        end
+    end))
+end
+
+local function shift2023On()
+    if player.Character then
+        scanCharacter2023(player.Character)
+    end
+
+    table.insert(shift2023Connections, player.CharacterAdded:Connect(function(character)
+        if states["2023 SHIFT"] then
+            scanCharacter2023(character)
+        end
+    end))
+
+    print("✅ 2023 SHIFT ON")
+end
+
+local function shift2023Off()
+    for _, connection in ipairs(shift2023Connections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    shift2023Connections = {}
+
+    if player.Character then
+        local hum = player.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.AutomaticScalingEnabled = true
+        end
+    end
+
+    print("❌ 2023 SHIFT OFF")
+end
+
+--========================================================
+-- 2024 SHIFT
+--========================================================
+
+local shift2024Connections = {}
+local shiftOffset2024 = Vector3.new(1.0, 0.4, 0)
+local normalOffset2024 = Vector3.new(0, 0, 0)
+local humanoid2024
+local isShiftLocked2024 = false
+
+local function shift2024On()
+    local function onCharacterAdded(character)
+        humanoid2024 = character:WaitForChild("Humanoid", 10)
+        if humanoid2024 then
+            humanoid2024.CameraOffset = normalOffset2024
+        end
+    end
+
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+
+    table.insert(shift2024Connections, player.CharacterAdded:Connect(onCharacterAdded))
+
+    table.insert(shift2024Connections, RunService.RenderStepped:Connect(function()
+        if not states["2024 SHIFT"] or not humanoid2024 then return end
+
+        if UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter then
+            if not isShiftLocked2024 then
+                isShiftLocked2024 = true
+                humanoid2024.CameraOffset = shiftOffset2024
+            end
+        else
+            if isShiftLocked2024 then
+                isShiftLocked2024 = false
+                humanoid2024.CameraOffset = normalOffset2024
+            end
+        end
+    end))
+
+    print("✅ 2024 SHIFT ON")
+end
+
+local function shift2024Off()
+    for _, connection in ipairs(shift2024Connections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    shift2024Connections = {}
+
+    if humanoid2024 then
+        humanoid2024.CameraOffset = normalOffset2024
+    end
+    humanoid2024 = nil
+    isShiftLocked2024 = false
+
+    print("❌ 2024 SHIFT OFF")
+end
+
+--========================================================
+-- HOT BAR TEXT
+--========================================================
+
+local hotbarTextConnections = {}
+local cachedLabelsText = {}
+local SMALL_TEXT_SIZE_HOTBAR = 12
+local TARGET_POSITION_HOTBAR = UDim2.new(0, -1, 0, -4)
+
+local function isHotbarSlotLabel(label)
+    if not (label and label:IsA("TextLabel") and label.Parent) then return false end
+
+    local rawText = label.Text:gsub("[%s%.]+", "")
+    local num = tonumber(rawText)
+    if not num or num < 0 or num > 10 then return false end
+
+    local current = label.Parent
+    local isHotbar = false
+
+    while current and current ~= game do
+        local name = current.Name:lower()
+
+        if name:find("shop") or name:find("trade") or name:find("profile") or 
+           name:find("leaderboard") or name:find("crafting") or name:find("level") or 
+           name:find("coin") or name:find("menu") or name:find("hud") then
+            return false
+        end
+
+        if name:find("hotbar") or name:find("backpack") or name:find("toolbar") or name:find("slot") then
+            isHotbar = true
+        end
+
+        current = current.Parent
+    end
+
+    return isHotbar
+end
+
+local function checkAndCacheText(descendant)
+    if descendant:IsA("TextLabel") and isHotbarSlotLabel(descendant) then
+        cachedLabelsText[descendant] = true
+    end
+end
+
+local function scanAndCacheText(container)
+    if not container then return end
+    for _, obj in ipairs(container:GetDescendants()) do
+        checkAndCacheText(obj)
+    end
+end
+
+local function hotBarTextOn()
+    if _G.TinyHotbarThread then
+        task.cancel(_G.TinyHotbarThread)
+        _G.TinyHotbarThread = nil
+    end
+
+    local pGui = player:FindFirstChild("PlayerGui")
+    if pGui then 
+        scanAndCacheText(pGui)
+        table.insert(hotbarTextConnections, pGui.DescendantAdded:Connect(checkAndCacheText))
+    end
+
+    pcall(function()
+        local coreGui = game:GetService("CoreGui")
+        scanAndCacheText(coreGui)
+        table.insert(hotbarTextConnections, coreGui.DescendantAdded:Connect(checkAndCacheText))
+    end)
+
+    table.insert(hotbarTextConnections, player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        table.clear(cachedLabelsText)
+        local currentPGui = player:FindFirstChild("PlayerGui")
+        if currentPGui then scanAndCacheText(currentPGui) end
+        pcall(function() scanAndCacheText(game:GetService("CoreGui")) end)
+    end))
+
+    _G.TinyHotbarThread = task.spawn(function()
+        while states["HOT BAR TEXT"] do
+            for label in pairs(cachedLabelsText) do
+                if label and label.Parent then
+                    if label.TextScaled then label.TextScaled = false end
+                    if label.TextSize ~= SMALL_TEXT_SIZE_HOTBAR then label.TextSize = SMALL_TEXT_SIZE_HOTBAR end
+                    if label.AnchorPoint ~= Vector2.new(0, 0) then label.AnchorPoint = Vector2.new(0, 0) end
+                    if label.Position ~= TARGET_POSITION_HOTBAR then label.Position = TARGET_POSITION_HOTBAR end
+
+                    label.Size = UDim2.new(0, 14, 0, 14)
+                    label.TextXAlignment = Enum.TextXAlignment.Left
+                    label.TextYAlignment = Enum.TextYAlignment.Top
+                else
+                    cachedLabelsText[label] = nil
+                end
+            end
+            task.wait(0.4)
+        end
+    end)
+
+    print("✅ HOT BAR TEXT ON")
+end
+
+local function hotBarTextOff()
+    for _, connection in ipairs(hotbarTextConnections) do
+        pcall(function() connection:Disconnect() end)
+    end
+    hotbarTextConnections = {}
+
+    if _G.TinyHotbarThread then
+        task.cancel(_G.TinyHotbarThread)
+        _G.TinyHotbarThread = nil
+    end
+
+    table.clear(cachedLabelsText)
+    print("❌ HOT BAR TEXT OFF")
+end
+
+--========================================================
+-- FUNÇÕES ON / OFF
+--========================================================
+
+local onFunctions = {
+    ["ANTI INVALID"] = function() print("✅ ANTI INVALID ON") end,
+    ["ANTI FLING"] = antiFlingOn,
+    ["ANIM ANTIGA"] = animAntigaOn,
+    ["CONFETE"] = confeteOn,
+    ["SOM DA ARMA"] = weaponSoundOn,
+    ["SPEED"] = speedOn,
+    ["SPEED RAW"] = speedRawOn,
+    ["SPEED CWLLES"] = speedCwllesOn,
+    ["BALAO DE CHAT OLD"] = balaoChatOldOn,
+    ["CORPO ANTIGO"] = bodyOn,
+    ["ANTI VOID"] = antiVoidOn,
+    ["CAELUS QUALITY"] = caelusQualityOn,
+    ["KORBLOX BIEL"] = korbloxBielOn,
+    ["2023 XP"] = xp2023On,
+    ["HOT BAR 2025"] = hotBar2025On,
+    ["2023 SHIFT"] = shift2023On,
+    ["2024 SHIFT"] = shift2024On,
+    ["HOT BAR TEXT"] = hotBarTextOn,
+    ["2020 QUALITY"] = quality2020On,
+    ["2023 QUALITY"] = quality2023On,
+    ["WATERBALLOON"] = waterballoonOn,
+    ["TIRAR X DA GUN"] = tirarXGunOn,
+    ["VOICE 2024"] = voice2024On
+}
+
+local offFunctions = {
+    ["ANTI INVALID"] = function() print("❌ ANTI INVALID OFF") end,
+    ["ANTI FLING"] = antiFlingOff,
+    ["ANIM ANTIGA"] = animAntigaOff,
+    ["CONFETE"] = confeteOff,
+    ["SOM DA ARMA"] = weaponSoundOff,
+    ["SPEED"] = speedOff,
+    ["SPEED RAW"] = speedRawOff,
+    ["SPEED CWLLES"] = speedCwllesOff,
+    ["BALAO DE CHAT OLD"] = balaoChatOldOff,
+    ["CORPO ANTIGO"] = bodyOff,
+    ["ANTI VOID"] = antiVoidOff,
+    ["CAELUS QUALITY"] = caelusQualityOff,
+    ["KORBLOX BIEL"] = korbloxBielOff,
+    ["2023 XP"] = xp2023Off,
+    ["HOT BAR 2025"] = hotBar2025Off,
+    ["2023 SHIFT"] = shift2023Off,
+    ["2024 SHIFT"] = shift2024Off,
+    ["HOT BAR TEXT"] = hotBarTextOff,
+    ["2020 QUALITY"] = quality2020Off,
+    ["2023 QUALITY"] = quality2023Off,
+    ["WATERBALLOON"] = waterballoonOff,
+    ["TIRAR X DA GUN"] = tirarXGunOff,
+    ["VOICE 2024"] = voice2024Off
+}
+
+--========================================================
+-- ATUALIZAR BOTÃO
+--========================================================
+
+function updateButton(name)
+    local data = buttons[name]
+    if not data then return end
+
+    if states[name] then
+        data.status.Text = "ON"
+        data.status.TextColor3 = RED
+        TweenService:Create(data.button, TweenInfo.new(0.15), {BackgroundColor3 = ON_COLOR}):Play()
+    else
+        data.status.Text = "OFF"
+        data.status.TextColor3 = TEXT_OFF
+        TweenService:Create(data.button, TweenInfo.new(0.15), {BackgroundColor3 = OFF_COLOR}):Play()
+    end
+end
+
+--========================================================
+-- BOTÕES DOS SCRIPTS
+--========================================================
+
+local scriptNames = {
+    "ANTI INVALID",
+    "ANTI FLING",
+    "ANIM ANTIGA",
+    "CONFETE",
+    "SOM DA ARMA",
+    "SPEED",
+    "SPEED RAW",
+    "SPEED CWLLES",
+    "BALAO DE CHAT OLD",
+    "CORPO ANTIGO",
+    "ANTI VOID",
+    "CAELUS QUALITY",
+    "KORBLOX BIEL",
+    "2023 XP",
+    "HOT BAR 2025",
+    "2023 SHIFT",
+    "2024 SHIFT",
+    "HOT BAR TEXT",
+    "2020 QUALITY",
+    "2023 QUALITY",
+    "WATERBALLOON",
+    "TIRAR X DA GUN",
+    "VOICE 2024"
+}
+
+for index, name in ipairs(scriptNames) do
+    local button = Instance.new("TextButton")
+    button.Name = name:gsub(" ", "_")
+    button.Size = UDim2.new(1, -4, 0, 34)
+    button.BackgroundColor3 = OFF_COLOR
+    button.BorderSizePixel = 0
+    button.Text = ""
+    button.AutoButtonColor = false
+    button.LayoutOrder = index
+    button.ZIndex = 20
+    button.Parent = content
+
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 8)
+    buttonCorner.Parent = button
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -75, 1, 0)
+    label.Position = UDim2.fromOffset(12, 0)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.TextColor3 = TEXT
+    label.Font = Enum.Font.GothamSemibold
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 21
+    label.Parent = button
+
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.fromOffset(55, 34)
+    status.Position = UDim2.new(1, -60, 0, 0)
+    status.BackgroundTransparency = 1
+    status.Text = "OFF"
+    status.TextColor3 = TEXT_OFF
+    status.Font = Enum.Font.GothamBold
+    status.TextSize = 11
+    status.ZIndex = 21
+    status.Parent = button
+
+    buttons[name] = {
+        button = button,
+        status = status
+    }
+
+    button.MouseEnter:Connect(function()
+        if not states[name] then
+            TweenService:Create(button, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(65, 38, 38)}):Play()
+        end
+    end)
+
+    button.MouseLeave:Connect(function()
+        updateButton(name)
+    end)
+
+    button.MouseButton1Click:Connect(function()
+        states[name] = not states[name]
+        updateButton(name)
+
+        if states[name] then
+            if onFunctions[name] then task.spawn(onFunctions[name]) end
+        else
+            if offFunctions[name] then task.spawn(offFunctions[name]) end
+        end
+    end)
+end
+
+--========================================================
+-- Y = CONFETE
+--========================================================
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    if input.KeyCode == Enum.KeyCode.Y then
+        states["CONFETE"] = not states["CONFETE"]
+        updateButton("CONFETE")
+
+        if states["CONFETE"] then
+            task.spawn(confeteOn)
+        else
+            task.spawn(confeteOff)
+        end
+    end
+end)
+
+--========================================================
+-- EXPANDIR / MINIMIZAR
+--========================================================
+
+local expanded = false
+local animating = false
+
+local function expand()
+    if expanded or animating then return end
+    animating = true
+    expanded = true
+
+    content.Visible = true
+    minus.Visible = true
+
+    local tween = TweenService:Create(main, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = BIG_SIZE})
+    tween:Play()
+    tween.Completed:Wait()
+
+    animating = false
+end
+
+local function collapse()
+    if not expanded or animating then return end
+    animating = true
+    expanded = false
+
+    local tween = TweenService:Create(main, TweenInfo.new(0.30, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut), {Size = SMALL_SIZE})
+    tween:Play()
+    tween.Completed:Wait()
+
+    content.Visible = false
+    minus.Visible = false
+
+    animating = false
+end
+
+minus.MouseButton1Click:Connect(collapse)
+
+--========================================================
+-- ARRASTAR E EXPANDIR
+--========================================================
+
+local dragging = false
+local dragStart
+local startPosition
+local moved = false
+local inputChangedConnection
+
+header.InputBegan:Connect(function(input)
+    if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+        return
+    end
+
+    dragging = true
+    moved = false
+    dragStart = input.Position
+    startPosition = main.Position
+
+    if inputChangedConnection then
+        inputChangedConnection:Disconnect()
+    end
+
+    inputChangedConnection = UserInputService.InputChanged:Connect(function(changedInput)
+        if not dragging then return end
+
+        if changedInput.UserInputType == Enum.UserInputType.MouseMovement or changedInput.UserInputType == Enum.UserInputType.Touch then
+            local delta = changedInput.Position - dragStart
+
+            if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
+                moved = true
+            end
+
+            main.Position = UDim2.new(
+                startPosition.X.Scale,
+                startPosition.X.Offset + delta.X,
+                startPosition.Y.Scale,
+                startPosition.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    local endConnection
+    endConnection = input.Changed:Connect(function()
+        if input.UserInputState == Enum.UserInputState.End then
+            dragging = false
+            if inputChangedConnection then
+                inputChangedConnection:Disconnect()
+                inputChangedConnection = nil
+            end
+            if endConnection then
+                endConnection:Disconnect()
+            end
+
+            if not expanded and not moved then
+                expand()
+            end
+        end
+    end)
+end)
+
+print("❤️ THII HUB'S carregado!")
+print("❤️ Clique no HUB para expandir.")
+print("❤️ Clique no − para minimizar.")
+print("❤️ Y = ligar/desligar CONFETE.")
